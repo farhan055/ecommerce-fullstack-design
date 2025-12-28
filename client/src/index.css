@@ -1,0 +1,72 @@
+/* --- CORE TAILWIND INJECTIONS --- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* GLOBAL RESET: 
+     Ensures that no matter the screen size, the app never stretches horizontally.
+     Smooth scrolling added for premium user experience.
+  */
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Setting default body typography and background */
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply bg-gray-50 text-gray-900;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* RESPONSIVE IMAGE POLICY:
+     Prevents images from breaking layouts on small screens.
+  */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* MOBILE ACCESSIBILITY:
+     Ensures inputs don't trigger auto-zoom on iOS browsers (requires 16px min).
+  */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* --- CUSTOM COMPONENTS --- */
+
+/* Standardized Container:
+   Centres content and applies responsive padding for Mobile, Tablet, and Desktop.
+*/
+.container {
+    @apply mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: 1280px;
+}
+
+/* PREMIUM BRANDED SCROLLBAR:
+   Custom styled scrollbar to match the Men's Wear blue aesthetic.
+*/
+::-webkit-scrollbar {
+  width: 6px; /* Thin, modern look */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0D6EFD; /* Brand Blue */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0056b3; /* Darker blue on hover */
+}
