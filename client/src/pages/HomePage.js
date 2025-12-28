@@ -92,7 +92,8 @@ const HomePage = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/products');
+               const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://menswear-backend.vercel.app';
+               const response = await fetch(`${backendUrl}/api/products`);
                 const data = await res.json();
                 setTrendingProducts(data.filter(p => trendingIds.includes(p.id)));
             } catch (err) { console.error(err); } 
