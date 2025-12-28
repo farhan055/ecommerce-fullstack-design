@@ -31,7 +31,7 @@ const ProfilePage = () => {
             if (!token) { navigate('/login'); return; }
             
             try {
-                const response = await fetch('http://localhost:5000/api/auth/me', {
+                const response = await fetch('https://menswear-backend.vercel.app/api/auth/me', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.ok) {
@@ -55,7 +55,7 @@ const ProfilePage = () => {
     const handleUpdate = async () => {
         const token = localStorage.getItem('token') || authUser?.token;
         try {
-            const response = await fetch('http://localhost:5000/api/auth/profile', {
+            const response = await fetch('https://menswear-backend.vercel.app/api/auth/profile', {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json', 

@@ -37,9 +37,9 @@ const Success = () => {
             try {
                 let url;
                 if (sessionId) {
-                    url = `http://localhost:5000/api/orders/verify?session_id=${sessionId}`;
+                    url = `https://menswear-backend.vercel.app/api/orders/verify?session_id=${sessionId}`;
                 } else {
-                    url = `http://localhost:5000/api/orders/single/${orderId}`;
+                    url = `https://menswear-backend.vercel.app/api/orders/single/${orderId}`;
                 }
 
                 const res = await fetch(url);

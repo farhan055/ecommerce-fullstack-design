@@ -68,7 +68,7 @@ const Wishlist = () => {
                             const pId = item._id || item.id;
                             const imageUrl = item.image?.startsWith('http') 
                                 ? item.image 
-                                : `http://localhost:5000${item.image}`;
+                                : `https://menswear-backend.vercel.app${item.image}`;
 
                             return (
                                 <div key={pId} className="group relative flex flex-col sm:flex-row gap-4 md:gap-6 p-4 md:p-6 border-2 md:border-4 border-gray-50 rounded-[2rem] md:rounded-[2.5rem] hover:border-blue-100 transition-all bg-white hover:shadow-2xl">

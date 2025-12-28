@@ -8,7 +8,7 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     
     // API base URL
-    const API_URL = "http://localhost:5000/api/cart";
+    const API_URL = "https://menswear-backend.vercel.app/api/cart";
 
     // Dynamic User ID: FromLocalStorage 
     const getUserData = () => {

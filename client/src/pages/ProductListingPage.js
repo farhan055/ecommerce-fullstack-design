@@ -41,7 +41,7 @@ const ProductListing = () => {
                     params.append('search', searchQuery);
                 }
 
-                const { data } = await axios.get(`http://localhost:5000/api/products?${params.toString()}`);
+                const { data } = await axios.get(`https://menswear-backend.vercel.app/api/products?${params.toString()}`);
                 setProducts(data);
                 setLoading(false);
             } catch (error) {
@@ -115,7 +115,7 @@ const ProductListing = () => {
                                 {/* Image Container with Hover Effects */}
                                 <div className="relative h-[400px] md:h-[480px] overflow-hidden bg-[#F8FAFC] rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm transition-all duration-500 hover:shadow-2xl">
                                     <img 
-                                        src={`http://localhost:5000${product.image.replace('/Products Data/', '/Product Data/')}`} 
+                                        src={`https://menswear-backend.vercel.app${product.image.replace('/Products Data/', '/Product Data/')}`} 
                                         alt={product.name} 
                                         className="w-full h-full object-cover transition duration-700 group-hover:scale-110" 
                                         onError={(e) => { e.target.src = "https://placehold.co/400x600?text=Model+Coming+Soon"; }}

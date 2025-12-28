@@ -8,7 +8,7 @@ import axios from 'axios';
  * Pointing to your backend server. 
  * Ensure your Node.js server is running on port 5000.
  */
-const API_BASE_URL = 'http://localhost:5000/api/products';
+const API_BASE_URL = 'https://menswear-backend.vercel.app/api/products';
 
 /**
  * @useFetchProducts

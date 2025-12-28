@@ -106,7 +106,7 @@ const HomePage = () => {
         e.preventDefault();
         setSending(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/inquires', {
+            const response = await fetch('https://menswear-backend.vercel.app/api/auth/inquires', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 

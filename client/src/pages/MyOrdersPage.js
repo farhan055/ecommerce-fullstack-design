@@ -66,7 +66,7 @@ const OrderCard = ({ order, onCancelSuccess }) => {
 
     const getImageUrl = (path) => {
         if (!path) return null;
-        return `http://localhost:5000${path}`; 
+        return `https://menswear-backend.vercel.app${path}`; 
     };
 
     // Handle Order Cancellation and Admin Notification
@@ -79,7 +79,7 @@ const OrderCard = ({ order, onCancelSuccess }) => {
             };
 
             // 1. API call to update status or delete order
-            await axios.put(`http://localhost:5000/api/orders/cancel-order/${order._id}`, {
+            await axios.put(`https://menswear-backend.vercel.app/api/orders/cancel-order/${order._id}`, {
                 email: user?.email || storedUser?.email,
                 reason: "User cancelled from Dashboard"
             }, config);
@@ -198,7 +198,7 @@ const MyOrdersPage = () => {
             }
 
             // Using your specific endpoint
-            const { data } = await axios.get(`http://localhost:5000/api/orders/myorders-by-email/${email}`);
+            const { data } = await axios.get(`https://menswear-backend.vercel.app/api/orders/myorders-by-email/${email}`);
             setOrders(data);
         } catch (err) { 
             console.error("Fetch Error:", err); 

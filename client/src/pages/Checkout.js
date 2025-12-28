@@ -280,7 +280,7 @@ const downloadCustomInvoice = () => {
 };
         try {
             // Save order to Database
-            await fetch('http://localhost:5000/api/orders', {
+            await fetch('https://menswear-backend.vercel.app/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(payload)
@@ -288,7 +288,7 @@ const downloadCustomInvoice = () => {
 
             if (paymentMethod === 'card') {
                 // Stripe Payment Logic
-                const stripeRes = await fetch('http://localhost:5000/api/create-checkout-session', {
+                const stripeRes = await fetch('https://menswear-backend.vercel.app/api/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 

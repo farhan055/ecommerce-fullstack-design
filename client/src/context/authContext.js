@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
 
             try {
                 // Fetching the latest user profile from the backend
-                const res = await fetch('http://localhost:5000/api/auth/me', {
+                const res = await fetch('https://menswear-backend.vercel.app/api/auth/me', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

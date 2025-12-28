@@ -30,7 +30,7 @@ const LoginPage = () => {
             };
 
             // Hit the login API
-            const res = await axios.post('http://localhost:5000/api/auth/login', loginData);
+            const res = await axios.post('https://menswear-backend.vercel.app/api/auth/login', loginData);
             
             if (res.data.token) {
                 const userData = res.data.user || res.data; 
