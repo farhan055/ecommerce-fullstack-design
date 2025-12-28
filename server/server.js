@@ -279,3 +279,5 @@ app.use('/api/contact', contactRoute);
 mongoose.connect(process.env.MONGO_URI)
     .then(() => app.listen(5000, () => console.log("🚀 SERVER RUNNING ON PORT 5000")))
     .catch(err => console.error("MongoDB Error:", err));
+
+module.exports = app;
