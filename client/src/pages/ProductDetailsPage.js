@@ -45,28 +45,28 @@ const ProductDetails = () => {
         : false;
 
     // Fetch product data on component mount or ID change
-    useEffect(() => {
-        const fetchSingleProduct = async () => {
-            try {
-                setLoading(true);
-              const res = await axios.get(`https://menswear-backend.vercel.app/api/products/single/${id}`);
-                // Initialize default size from DB data
-                if (data.sizes) {
-                    const sizeArray = Array.isArray(data.sizes) 
-                        ? data.sizes 
-                        : data.sizes.toString().split(',').map(s => s.trim()).filter(s => s !== "");
-                    
-                    if (sizeArray.length > 0) {
-                        setSelectedSize(sizeArray[0]);
-                    }
-                }
-                setLoading(false);
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                setLoading(false);
+   // ProductDetailsPage.js mein Line 50 se 70 ke beech ye replace karein:
+useEffect(() => {
+    const fetchProduct = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.get(`https://menswear-backend.vercel.app/api/products/single/${id}`);
+            
+            // Yahan hum 'data' ko define kar rahe hain jo errors khatam karega
+            const data = res.data; 
+
+            if (data) {
+                setProduct(data);
+                // Agar aapne images ya specs set karni hain toh:
+                // setMainImage(data.image); 
             }
-        };
-        fetchSingleProduct();
+        } catch (err) {
+            console.error("Fetch Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+    fetchProduct();
         window.scrollTo(0, 0);
     }, [id]);
 
