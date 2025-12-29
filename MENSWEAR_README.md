@@ -74,6 +74,11 @@ ecommerce-fullstack-design/
 - **Stripe Integration:** Secure checkout flow for digital payments.  
 - **Admin Control:** Protected routes for managing inventory (CRUD operations).  
 
+### Admin Access (For Evaluation):
+
+Email: administrator@menswear.com
+
+Password: admin123
 ---
 
 ## 🚦 Getting Started
