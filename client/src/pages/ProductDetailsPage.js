@@ -50,7 +50,7 @@ useEffect(() => {
     const fetchProduct = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`https://menswear-backend.vercel.app/api/products/single/${id}`);
+          const res = await axios.get(`https://menswear-backend.vercel.app/api/products/${id}`);
             
             // Yahan hum 'data' ko define kar rahe hain jo errors khatam karega
             const data = res.data; 
