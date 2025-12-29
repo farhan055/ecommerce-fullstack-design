@@ -7,8 +7,8 @@ import { useCart } from "../context/CartContext";
 
 /**
  * @ProductCard
- * This version restores the bold "Black and Blue" border grid aesthetic.
- * Engineered for a high-end streetwear brand feel with thick borders and sharp hover effects.
+ * Fully Optimized Logic & CSS.
+ * Maintains the bold "Black and Blue" streetwear aesthetic.
  */
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
@@ -18,11 +18,11 @@ const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
-  const pId = product._id;
-  console.log("DEBUG ID:", product._id || product.id);
+  // Final Logic: Get ID from any possible source
+  const pId = product._id || product.id;
   const currentPrice = convertPrice(product.price);
 
-  // Resolving image paths for the public folder
+  // Resolving image paths
   const getImageUrl = () => {
     if (!product.image) return "https://via.placeholder.com/400x500?text=No+Image";
     if (product.image.startsWith('http') || product.image.startsWith('data:')) return product.image;
@@ -34,10 +34,7 @@ const ProductCard = ({ product }) => {
   const isInWishlist = wishlistItems?.some(item => (item._id === pId || item.id === pId));
 
   return (
-    /* --- THE BOLD BORDER GRID ---
-       Added 'border-2 border-black' as the primary frame.
-       The 'hover:border-[#0D6EFD]' creates that dynamic blue switch on hover.
-    */
+    /* --- THE BOLD BORDER GRID (STAYS SAME) --- */
     <div className="group bg-white rounded-[2rem] border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_0px_rgba(13,110,253,1)] hover:border-[#0D6EFD] transition-all duration-300 flex flex-col h-full overflow-hidden">
       
       {/* --- IMAGE AREA --- */}
@@ -55,21 +52,28 @@ const ProductCard = ({ product }) => {
           }}
         />
         
-        {/* Action Buttons Overlay */}
-        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-all duration-300">
+        {/* Action Buttons Overlay - Logic: Shows on Hover (Desktop) & Tap (Mobile) */}
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 group-active:opacity-100 flex items-center justify-center gap-3 transition-all duration-300 z-10">
           <button 
-            onClick={(e) => { e.stopPropagation(); navigate(`/product/${pId}`); }} 
-            className="bg-white border-2 border-black p-3 rounded-full text-black hover:bg-[#0D6EFD] hover:text-white hover:border-[#0D6EFD] transition-all shadow-lg"
+            type="button"
+            onClick={(e) => { 
+              e.preventDefault(); // Safety
+              e.stopPropagation(); 
+              navigate(`/product/${pId}`); 
+            }} 
+            className="z-20 bg-white border-2 border-black p-3 rounded-full text-black hover:bg-[#0D6EFD] hover:text-white hover:border-[#0D6EFD] transition-all shadow-lg active:scale-90"
           >
             <Eye size={20} />
           </button>
           
           <button 
+            type="button"
             onClick={(e) => { 
+                e.preventDefault();
                 e.stopPropagation(); 
                 addToWishlist({...product, id: pId, _id: pId, image: imageUrl}); 
             }}
-            className={`border-2 border-black p-3 rounded-full transition-all shadow-lg ${isInWishlist ? 'bg-red-500 text-white border-red-500' : 'bg-white text-black hover:bg-black hover:text-white'}`}
+            className={`z-20 border-2 border-black p-3 rounded-full transition-all shadow-lg active:scale-90 ${isInWishlist ? 'bg-red-500 text-white border-red-500' : 'bg-white text-black hover:bg-black hover:text-white'}`}
           >
             <Heart size={20} fill={isInWishlist ? "currentColor" : "none"} />
           </button>
@@ -83,13 +87,12 @@ const ProductCard = ({ product }) => {
         </Link>
         
         <div className="mt-3 flex justify-center items-baseline gap-2">
-          {/* Price with bold shadow-like font */}
           <span className="text-2xl md:text-3xl font-[1000] italic tracking-tighter text-black">
             {currency} {currentPrice}
           </span>
         </div>
         
-        {/* Add to Cart Button with Thick Black Border */}
+        {/* Add to Cart Button */}
         <button 
           onClick={(e) => { 
             e.stopPropagation(); 
@@ -104,4 +107,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default ProductCard; 
