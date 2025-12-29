@@ -1,6 +1,7 @@
+
 const Cart = require('../models/Cart');
 // DB connection import karein
-const connectDB = require('../config/db').default || require('../config/db');
+const connectDB = require('../config/db');
 
 // GET Cart by UserID
 exports.getCart = async (req, res) => {

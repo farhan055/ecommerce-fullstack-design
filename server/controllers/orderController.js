@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const nodemailer = require('nodemailer');
 // Zaroori Fix: DB connection ensure karein
-const connectDB = require('../config/db').default || require('../config/db');
+const connectDB = require('../config/db');
 
 // USD Formatter
 const formatUSD = (amount) => `USD ${parseFloat(amount).toFixed(2)}`;

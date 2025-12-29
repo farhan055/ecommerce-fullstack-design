@@ -1,10 +1,10 @@
+const connectDB = require('../config/db');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const Subscriber = require('../models/Subscriber');
 const Inquiry = require('../models/Inquires');
-// Vercel Fix: Ensure DB connection function is imported
-const connectDB = require('../config/db').default || require('../config/db');
+
 
 // --- Helper Functions ---
 const generateToken = (id) => {

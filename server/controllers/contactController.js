@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const Inquiry = require('../models/Inquires'); // Database mein save karne ke liye
-const connectDB = require('../config/db').default || require('../config/db');
+const connectDB = require('../config/db');
 
 /**
  * HELPER: CONFIGURE MAIL TRANSPORTER
