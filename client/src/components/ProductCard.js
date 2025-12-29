@@ -19,6 +19,7 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   const pId = product._id || product.id;
+  console.log("DEBUG ID:", product._id || product.id);
   const currentPrice = convertPrice(product.price);
 
   // Resolving image paths for the public folder
