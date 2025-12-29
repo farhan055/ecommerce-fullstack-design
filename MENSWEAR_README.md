@@ -18,12 +18,20 @@ This project is a premium eCommerce solution designed for a modern Men's Apparel
 
 ## 🛠️ Technical Implementation
 
-### Database Management (MongoDB Compass)
-- **Schema Design:** Structured NoSQL collections for Users, Products, Orders, and Subscribers.  
+### Database Management (MongoDB Atlas & Compass)
+
+-**Hybrid Integration:** Project connects to MongoDB Atlas for cloud deployment and MongoDB Compass for local schema visualization.
+
+-**Schema Design:** Structured NoSQL collections for Users, Products, Orders, and Subscribers with optimized indexing for fast category filtering.
 - **Local Development:** Managed via MongoDB Compass for real-time data visualization and CRUD testing during development.  
 - **Scalability:** Optimized indexing for fast product searches and category filtering.  
 
 ### Backend & Business Logic
+-**Secure Payments:** Integrated Stripe API for encrypted transaction processing.
+
+-**Automated Mailer:** Nodemailer handles order receipts and Admin alerts for new sales or cancellations.
+
+-**Resilience:** Implemented a Fallback Contact Route via Formspree to ensure 100% availability for customer inquiries.
 - **Dynamic Pricing:** Custom logic in `server.js` handles currency detection (USD for international prices, PKR for local prices).  
 - **Automated Mailer:**  
   - Order Success: Automated receipts sent to customers.  
