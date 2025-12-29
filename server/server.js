@@ -18,7 +18,7 @@ const app = express();
 
 // --- Middlewares ---
 app.use(cors({
-    origin: ["https://menswearbrand.vercel.app", "http://localhost:3000"],
+    origin: ["https://menswearbrand-azure.vercel.app", "http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
