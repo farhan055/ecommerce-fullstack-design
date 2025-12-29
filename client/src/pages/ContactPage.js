@@ -47,34 +47,47 @@ const ContactPage = () => {
         setFormData(prev => ({ ...prev, [id]: value }));
         if (status.error || status.success) setStatus({ loading: false, error: null, success: null });
     };
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus({ loading: true, error: null, success: null });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setStatus({ loading: true, error: null, success: null });
+    try {
+        const response = await fetch('https://menswear-backend.vercel.app/api/contact', {
+            method: 'POST',
+            mode: 'cors', // <--- Add this for cross-origin safety
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' 
+            },
+            body: JSON.stringify({
+                ...formData,
+                adminEmail: 'menswearofficial07@gmail.com' 
+            })
+        });
 
-        try {
-            const response = await fetch('https://menswear-backend.vercel.app/api/contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    adminEmail: 'menswearofficial07@gmail.com' 
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setStatus({ loading: false, error: null, success: "Message Sent! Check your email." });
-                setFormData(prev => ({ ...prev, subject: '', message: '' })); 
-            } else {
-                throw new Error(data.message || "Failed to send message");
-            }
-        } catch (err) {
-            setStatus({ loading: false, error: err.message, success: null });
+        // Check if response is actually JSON
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Server didn't return JSON. Check Backend CORS.");
         }
-    };
 
+        const data = await response.json();
+
+        if (response.ok) {
+            setStatus({ loading: false, error: null, success: "Message Sent! Check your email." });
+            setFormData(prev => ({ ...prev, subject: '', message: '' })); 
+        } else {
+            throw new Error(data.message || "Failed to send message");
+        }
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        setStatus({ 
+            loading: false, 
+            error: "CONNECTION ERROR: PLEASE CHECK YOUR INTERNET OR TRY LATER", 
+            success: null 
+        });
+    }
+};
     return (
         <div className="bg-white min-h-screen font-inter">
             <main className="py-10 md:py-16">
