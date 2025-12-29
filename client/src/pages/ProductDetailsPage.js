@@ -49,9 +49,7 @@ const ProductDetails = () => {
         const fetchSingleProduct = async () => {
             try {
                 setLoading(true);
-                const { data } = await axios.get(`https://menswear-backend.vercel.app/api/products/${id}`);
-                setProduct(data);
-                
+              const res = await axios.get(`https://menswear-backend.vercel.app/api/products/single/${id}`);
                 // Initialize default size from DB data
                 if (data.sizes) {
                     const sizeArray = Array.isArray(data.sizes) 
