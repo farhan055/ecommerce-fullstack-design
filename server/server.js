@@ -17,7 +17,11 @@ const contactRoute = require('./routes/Contact');
 const app = express();
 
 // --- Middlewares ---
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({
+    origin: ["https://menswearbrand.vercel.app", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(express.json());
 app.use('/Products-Data', express.static(path.join(__dirname, 'Products-Data')));
 

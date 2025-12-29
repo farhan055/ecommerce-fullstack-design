@@ -451,11 +451,32 @@ const downloadCustomInvoice = () => {
                                         <h4 className="text-2xl font-black uppercase italic mt-6">Cash On Delivery</h4>
                                         <p className="text-xs font-bold text-gray-400 uppercase mt-2">Pay when you receive</p>
                                     </div>
-                                    <div onClick={() => setPaymentMethod('card')} className={`relative p-10 rounded-[3rem] border-4 cursor-pointer transition-all ${paymentMethod === 'card' ? 'border-sky-500 bg-sky-50/30' : 'border-gray-100 hover:border-black'}`}>
-                                        <CreditCard size={40} className={paymentMethod === 'card' ? 'text-sky-500' : 'text-gray-300'}/>
-                                        <h4 className="text-2xl font-black uppercase italic mt-6">Card Payment</h4>
-                                        <p className="text-xs font-bold text-gray-400 uppercase mt-2">Secure via Stripe</p>
-                                    </div>
+                                  <div 
+    onClick={() => setPaymentMethod('card')} 
+    className={`relative p-10 rounded-[3rem] border-4 cursor-pointer transition-all ${
+        paymentMethod === 'card' ? 'border-sky-500 bg-sky-50/30' : 'border-gray-100 hover:border-black'
+    }`}
+>
+    {/* Card Logos (Top Right) */}
+    <div className="absolute top-6 right-8 flex gap-2">
+        <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" 
+            alt="Visa" 
+            className="h-6 w-auto opacity-80"
+        />
+        <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" 
+            alt="Mastercard" 
+            className="h-6 w-auto opacity-80"
+        />
+    </div>
+    <CreditCard 
+        size={40} 
+        className={paymentMethod === 'card' ? 'text-sky-500' : 'text-gray-300'}
+    />
+    <h4 className="text-2xl font-black uppercase italic mt-6">Card Payment</h4>
+    <p className="text-xs font-bold text-gray-400 uppercase mt-2">Secure via Stripe</p>
+</div>
                                 </div>
                             </section>
                         </form>
