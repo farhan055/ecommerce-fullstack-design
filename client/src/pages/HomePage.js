@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import { ChevronRight, User, Zap, Flame, LogOut, ArrowRight, Send, Mail, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/authContext';
 
-// --- STYLE CONSTANTS ---
+// ---- STYLE CONSTANTS ----
 const containerMaxClass = "container mx-auto px-4 max-w-7xl";
 const sportyHeading = "font-[900] uppercase italic tracking-tighter leading-none";
 const sportyButton = "font-black text-[10px] md:text-[12px] uppercase tracking-widest italic transition-all duration-300";
