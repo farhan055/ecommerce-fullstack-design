@@ -46,14 +46,17 @@ const fallbackProducts = [
     { id: "hd-007", name: "Black Oversize Hoodie", category: "jackets-hoodies", price: 12.5, color: "Black", sizes: ["S", "M", "L", "XL"], description: "Quality product from MensWear collection.", image: "/Products-Data/hoodie7.jpg", type: "Standard", stock: 50 }
 ];
 
-// GET ALL PRODUCTS (With Filtering & Search Logic)
+// GET ALL PRODUCTS
 router.get('/', async (req, res) => {
     try {
         const { category, search } = req.query;
         let query = {};
         if (category && category !== 'All') query.category = category;
         if (search) {
-            query.$or = [{ name: { $regex: search, $options: 'i' } }, { category: { $regex: search, $options: 'i' } }];
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } }, 
+                { id: { $regex: search, $options: 'i' } } // Custom ID search bhi add kar di
+            ];
         }
         const products = await Product.find(query).maxTimeMS(4000);
         if (products && products.length > 0) return res.status(200).json(products);
@@ -62,39 +65,27 @@ router.get('/', async (req, res) => {
         let filtered = fallbackProducts;
         const { category, search } = req.query;
         if (category && category !== 'All') filtered = filtered.filter(p => p.category === category);
-        if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+        if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase()));
         res.status(200).json(filtered);
     }
 });
 
-// GET SINGLE PRODUCT
+// GET SINGLE PRODUCT (Specifically using Custom ID)
 router.get('/:id', async (req, res) => {
+    const requestedId = req.params.id; // Example: "ts-001"
     try {
-        let product = await Product.findOne({ id: req.params.id }).maxTimeMS(2000);
+        // Find by custom 'id' field, NOT _id
+        let product = await Product.findOne({ id: requestedId }).maxTimeMS(2000);
+        
         if (!product) {
-            const mock = fallbackProducts.find(p => p.id === req.params.id);
-            return mock ? res.json(mock) : res.status(404).json({ message: "Not Found" });
+            const mock = fallbackProducts.find(p => p.id === requestedId);
+            return mock ? res.json(mock) : res.status(404).json({ message: "Product Not Found" });
         }
         res.json(product);
     } catch (e) {
-        const mock = fallbackProducts.find(p => p.id === req.params.id);
-        res.json(mock || fallbackProducts[0]);
+        const mock = fallbackProducts.find(p => p.id === requestedId);
+        res.json(mock || { message: "Error fetching product" });
     }
-});
-
-// POST 
-router.post('/', async (req, res) => {
-    res.status(201).json({ message: "Product saved successfully", data: req.body });
-});
-
-// PUT
-router.put('/:id', async (req, res) => {
-    res.status(200).json({ message: "Product updated successfully", id: req.params.id });
-});
-
-// DELETE 
-router.delete('/:id', async (req, res) => {
-    res.status(200).json({ message: "Product removed from database" });
 });
 
 module.exports = router;
