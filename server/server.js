@@ -16,11 +16,12 @@ const contactRoute = require('./routes/Contact');
 
 const app = express();
 const corsOptions = {
+  origin: true, 
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
-// --- Middlewares ---
+
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
