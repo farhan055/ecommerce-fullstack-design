@@ -206,7 +206,7 @@ app.put('/api/orders/cancel-order/:id', async (req, res) => {
 // 2. Stripe Payment Verification
 app.get('/api/orders/verify', async (req, res) => {
     try {
-        const { session_id, id } = req.query; // 'id' bhi lein frontend se
+        const { session_id, id } = req.query; 
         const session = await stripe.checkout.sessions.retrieve(session_id);
         const orderIdFromStripe = session.metadata?.customOrderId || id; 
         const order = await Order.findOne({ customOrderId: orderIdFromStripe })
