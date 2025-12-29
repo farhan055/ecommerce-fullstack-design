@@ -1,7 +1,11 @@
 const Cart = require('../models/Cart');
+// DB connection import karein
+const connectDB = require('../config/db').default || require('../config/db');
 
 // GET Cart by UserID
 exports.getCart = async (req, res) => {
+    // Vercel Fix: Connection ensure karein
+    await connectDB();
     try {
         const cart = await Cart.findOne({ userId: req.params.userId });
         if (!cart) return res.status(200).json({ items: [] });
@@ -13,6 +17,8 @@ exports.getCart = async (req, res) => {
 
 // SAVE or UPDATE Cart
 exports.saveCart = async (req, res) => {
+    // Vercel Fix: Connection ensure karein
+    await connectDB();
     const { userId, items } = req.body;
     try {
         let cart = await Cart.findOne({ userId });

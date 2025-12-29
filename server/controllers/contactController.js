@@ -1,8 +1,9 @@
 const nodemailer = require('nodemailer');
+const Inquiry = require('../models/Inquires'); // Database mein save karne ke liye
+const connectDB = require('../config/db').default || require('../config/db');
 
 /**
  * HELPER: CONFIGURE MAIL TRANSPORTER
- * Uses Gmail SMTP with secure SSL connection
  */
 const getTransporter = () => {
     return nodemailer.createTransport({
@@ -18,19 +19,18 @@ const getTransporter = () => {
 };
 
 /**
- * @desc    Submit Contact Form & Send Email to Admin and User
- * @route   POST /api/contact
- * @access  Public
+ * @desc    Submit Contact Form & Send Email
  */
 exports.submitContact = async (req, res) => {
+    // VERCEL FIX: Har request se pehle connection ensure karein
+    await connectDB();
+
     try {
-        // 1. EXTRACT DATA
-        // Fetches from req.user (if logged in) or req.body (for guest users)
         const senderName = req.user ? req.user.name : req.body.name;
         const senderEmail = req.user ? req.user.email : req.body.email;
         const { subject, message } = req.body;
 
-        // 2. DATA VALIDATION
+        // DATA VALIDATION
         if (!senderName || !senderEmail || !message) {
             return res.status(400).json({ 
                 success: false, 
@@ -38,13 +38,20 @@ exports.submitContact = async (req, res) => {
             });
         }
 
+        // OPTIONAL: Database mein record save karein (Best Practice for E-commerce)
+        await Inquiry.create({
+            item: subject || "General Contact",
+            details: message,
+            submittedBy: senderEmail
+        });
+
         const transporter = getTransporter();
 
-        // 3. ADMIN NOTIFICATION PAYLOAD (Sent to your inbox)
+        // ADMIN MAIL OPTIONS
         const adminMailOptions = {
             from: `"${senderName.toUpperCase()}" <menswearofficial07@gmail.com>`, 
             to: 'menswearofficial07@gmail.com',
-            replyTo: senderEmail, // This allows you to reply directly to the customer
+            replyTo: senderEmail,
             subject: `🚨 NEW QUERY: ${subject || 'General Inquiry'}`,
             html: `
                 <div style="font-family: sans-serif; padding: 20px; border: 2px solid #0ea5e9; border-radius: 10px;">
@@ -60,7 +67,7 @@ exports.submitContact = async (req, res) => {
             `
         };
 
-        // 4. USER CONFIRMATION PAYLOAD (Auto-reply sent to customer)
+        // USER MAIL OPTIONS
         const userMailOptions = {
             from: `"MENSWEAR OFFICIAL" <menswearofficial07@gmail.com>`,
             to: senderEmail,
@@ -69,15 +76,11 @@ exports.submitContact = async (req, res) => {
                 <div style="font-family: 'Helvetica', Arial, sans-serif; text-align: center; padding: 50px; background-color: #000; color: #fff; border-radius: 24px; border: 1px solid #1a1a1a;">
                     <h1 style="color: #0ea5e9; font-style: italic; letter-spacing: 4px; font-weight: 900; margin-bottom: 0;">MENSWEAR OFFICIAL</h1>
                     <p style="color: #444; font-size: 10px; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase;">Premium Mens Apparel</p>
-                    
                     <div style="height: 1px; background: linear-gradient(to right, transparent, #0ea5e9, transparent); width: 70%; margin: 30px auto;"></div>
-                    
                     <p style="font-size: 20px; font-weight: bold; letter-spacing: -0.5px;">Hello <strong>${senderName}</strong>,</p>
-                    
                     <p style="color: #aaa; font-size: 15px; line-height: 1.6; max-width: 400px; margin: 0 auto;">
-                        In the fast-paced world of fashion, we don't believe in making you wait. Your inquiry has been successfully logged into our system.
+                        Your inquiry has been successfully logged into our system. Our team will respond shortly.
                     </p>
-                    
                     <div style="background: #0a0a0a; padding: 15px 25px; display: inline-block; border-radius: 12px; border: 1px solid #0ea5e9; margin-top: 20px;">
                         <p style="margin: 0; font-size: 11px; color: #0ea5e9; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
                             Ticket Status: <span style="color: #fff;">IN-REVIEW</span>
@@ -87,8 +90,7 @@ exports.submitContact = async (req, res) => {
             `
         };
 
-        // 5. EXECUTE DUAL TRANSMISSION
-        // Promise.all speeds up the process by sending both emails at the same time
+        // EXECUTE DUAL TRANSMISSION
         await Promise.all([
             transporter.sendMail(adminMailOptions),
             transporter.sendMail(userMailOptions)

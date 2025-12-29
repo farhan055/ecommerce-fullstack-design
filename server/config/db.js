@@ -1,23 +1,24 @@
-// server/config/db.js
 import mongoose from 'mongoose';
 
-/**
- * Database Connection Handler
- * Connects the application to MongoDB (via Compass locally or Atlas in cloud).
- */
 const connectDB = async () => {
+    // Agar pehle se connected hai toh dobara connect na karein
+    if (mongoose.connections[0].readyState) {
+        return;
+    }
+
     try {
-        // MONGO_URI will contain your Compass string (mongodb://localhost:27017/...)
-        const conn = await mongoose.connect(process.env.MONGO_URI);
+        mongoose.set('strictQuery', true);
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
+            // Ye options connection stable banate hain
+            serverSelectionTimeoutMS: 5000, 
+            socketTimeoutMS: 45000,
+        });
         
-        // Success message for terminal logs
         console.log(`🚀 DATABASE SYNCHRONIZED: ${conn.connection.host}`);
     } catch (error) {
-        // Detailed error logging for troubleshooting
         console.error(`❌ CONNECTION FAILED: ${error.message}`);
-        
-        // Critical error: Shutdown server if database is unreachable
-        process.exit(1); 
+        // Vercel par process.exit(1) mat karein, warna pura function kill ho jayega
+        throw error; 
     }
 };
 
