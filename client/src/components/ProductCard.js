@@ -18,8 +18,8 @@ const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
-  // Final Logic: Get ID from any possible source
-  const pId = product._id || product.id;
+  // GET PRODUCT DETAILS
+ const pId = product.id;
   const currentPrice = convertPrice(product.price);
 
   // Resolving image paths
@@ -31,7 +31,7 @@ const ProductCard = ({ product }) => {
   };
 
   const imageUrl = getImageUrl();
-  const isInWishlist = wishlistItems?.some(item => (item._id === pId || item.id === pId));
+ const isInWishlist = wishlistItems?.some(item => item.id === pId);
 
   return (
     /* --- THE BOLD BORDER GRID (STAYS SAME) --- */
@@ -53,7 +53,7 @@ const ProductCard = ({ product }) => {
         />
         
         {/* Action Buttons Overlay - Logic: Shows on Hover (Desktop) & Tap (Mobile) */}
-        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 group-active:opacity-100 flex items-center justify-center gap-3 transition-all duration-300 z-10">
+       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 group-active:opacity-100 flex items-center justify-center gap-3 transition-all duration-300 z-10">
           <button 
             type="button"
             onClick={(e) => { 
