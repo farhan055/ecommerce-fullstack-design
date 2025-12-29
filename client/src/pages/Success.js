@@ -22,7 +22,13 @@ const Success = () => {
 
     const orderId = searchParams.get('orderId') || searchParams.get('id');
     const sessionId = searchParams.get('session_id');
-    const symbol = currency === 'PKR' ? 'Rs ' : '$';
+
+    const activeSymbol = useMemo(() => {
+    if (orderData && orderData.currencyCode) {
+        return orderData.currencyCode === 'PKR' ? 'Rs ' : '$';
+    }
+    return currency === 'PKR' ? 'Rs ' : '$';
+}, [orderData, currency]);
 
     /* ================= FETCH & VERIFY ORDER ================= */
     useEffect(() => {
@@ -259,7 +265,7 @@ const downloadCustomInvoice = (data, activeSymbol) => {
                                     <div key={i} className="flex justify-between border-b border-white/10 pb-2">
                                         <span className="uppercase font-black text-[10px] w-2/3">{(item.qty || item.quantity)}x {item.name}</span>
                                         <span className="font-black italic text-sky-400">
-                                            {symbol}{(item.price * (item.qty || item.quantity)).toFixed(2)}
+                                            {activeSymbol}{(item.price * (item.qty || item.quantity)).toFixed(2)}
                                         </span>
                                     </div>
                                 ))}
@@ -268,13 +274,13 @@ const downloadCustomInvoice = (data, activeSymbol) => {
                             <div className="mb-10">
                                 <p className="text-gray-400 text-[10px] uppercase font-bold mb-1">Total Amount Paid</p>
                                 <p className="text-5xl font-black italic text-sky-500">
-                                    {symbol}{Number(orderData.totalPrice).toFixed(2)}
+                                    {activeSymbol}{Number(orderData.totalPrice).toFixed(2)}
                                 </p>
                             </div>
 
                             <div className="space-y-4">
                                 <button
-                                    onClick={() => downloadCustomInvoice(orderData, symbol)}
+                                    onClick={() => downloadCustomInvoice(orderData, activeSymbol)}
                                     className="w-full bg-sky-500 hover:bg-sky-400 transition-colors text-black py-6 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-3"
                                 >
                                     <Download size={18}/> Download Invoice
