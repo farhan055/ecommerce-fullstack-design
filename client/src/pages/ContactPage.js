@@ -52,40 +52,59 @@ const handleSubmit = async (e) => {
     setStatus({ loading: true, error: null, success: null });
 
     try {
+        // --- STEP 1: PRIMARY ATTEMPT (Your Backend) ---
+        // Hum koshish karenge ke aapka backend chale
         const response = await fetch('https://menswear-backend.vercel.app/api/contact', {
             method: 'POST',
-            mode: 'cors', // <--- Add this for cross-origin safety
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json' 
-            },
-            body: JSON.stringify({
-                ...formData,
-                adminEmail: 'menswearofficial07@gmail.com' 
-            })
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
         });
-
-        // Check if response is actually JSON
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-            throw new Error("Server didn't return JSON. Check Backend CORS.");
-        }
-
-        const data = await response.json();
 
         if (response.ok) {
-            setStatus({ loading: false, error: null, success: "Message Sent! Check your email." });
-            setFormData(prev => ({ ...prev, subject: '', message: '' })); 
+            const data = await response.json();
+            setStatus({ loading: false, error: null, success: "Message Sent Successfully!" });
+            setFormData(prev => ({ ...prev, subject: '', message: '' }));
+            return; // Agar backend chal gaya toh yahin se khatam
         } else {
-            throw new Error(data.message || "Failed to send message");
+            throw new Error("Backend Limit or CORS");
         }
+
     } catch (err) {
-        console.error("Fetch Error:", err);
-        setStatus({ 
-            loading: false, 
-            error: "CONNECTION ERROR: PLEASE CHECK YOUR INTERNET OR TRY LATER", 
-            success: null 
-        });
+        console.warn("Switching to Backup Server (Formspree)...");
+
+        // --- STEP 2: JUGAAD / BACKUP (Formspree) ---
+        // Agar backend fail hua toh ye wala fetch chalay ga
+        try {
+            const backupResponse = await fetch('https://formspree.io/f/xbdjpeyj', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Name: formData.name,
+                    Email: formData.email,
+                    Subject: formData.subject,
+                    Message: formData.message,
+                    Admin_Note: "Sent via Backup Route due to Vercel Limits"
+                })
+            });
+
+            if (backupResponse.ok) {
+                setStatus({ 
+                    loading: false, 
+                    error: null, 
+                    success: "Message Sent! We will contact you soon." 
+                });
+                setFormData(prev => ({ ...prev, subject: '', message: '' }));
+            } else {
+                throw new Error("All servers busy");
+            }
+        } catch (backupErr) {
+            setStatus({ 
+                loading: false, 
+                error: "Network Error. Please try again later.", 
+                success: null 
+            });
+        }
     }
 };
     return (
