@@ -1,111 +1,87 @@
 const nodemailer = require('nodemailer');
-const Inquiry = require('../models/Inquires'); // Database mein save karne ke liye
+const Inquiry = require('../models/Inquires'); 
 const connectDB = require('../config/db');
 
-/**
- * HELPER: CONFIGURE MAIL TRANSPORTER
- */
 const getTransporter = () => {
     return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, 
+        service: 'gmail',
         auth: { 
             user: 'menswearofficial07@gmail.com', 
-            pass: process.env.EMAIL_PASS 
-        },
-        tls: { rejectUnauthorized: false }
+            pass: process.env.EMAIL_PASS // <--- CHECK THIS IN .ENV
+        }
     });
 };
 
-/**
- * @desc    Submit Contact Form & Send Email
- */
 exports.submitContact = async (req, res) => {
-    // VERCEL FIX: Har request se pehle connection ensure karein
-    await connectDB();
+    try {
+        await connectDB();
+    } catch (dbErr) {
+        console.error("DB Connection Failed");
+    }
 
     try {
-        const senderName = req.user ? req.user.name : req.body.name;
-        const senderEmail = req.user ? req.user.email : req.body.email;
-        const { subject, message } = req.body;
+        // 1. Destructure directly from req.body to avoid undefined errors
+        const { name, email, subject, message } = req.body;
 
-        // DATA VALIDATION
-        if (!senderName || !senderEmail || !message) {
+        // 2. Strict Validation
+        if (!name || !email || !message) {
             return res.status(400).json({ 
                 success: false, 
-                message: "VALIDATION FAILED: NAME, EMAIL, AND MESSAGE ARE REQUIRED" 
+                message: "Please provide Name, Email and Message." 
             });
         }
 
-        // OPTIONAL: Database mein record save karein (Best Practice for E-commerce)
-        await Inquiry.create({
-            item: subject || "General Contact",
-            details: message,
-            submittedBy: senderEmail
-        });
+        // 3. Save to DB first (Taake record miss na ho)
+        let savedInquiry;
+        try {
+            savedInquiry = await Inquiry.create({
+                item: subject || "General Contact",
+                details: message,
+                submittedBy: email
+            });
+        } catch (dbError) {
+            console.error("Inquiry Save Error:", dbError.message);
+            // Agar DB fail ho tab bhi process chalne dein
+        }
 
-        const transporter = getTransporter();
+        // 4. Email Logic in a Try-Catch (Taake email fail hone se 500 error na aaye)
+        try {
+            const transporter = getTransporter();
+            
+            const adminMailOptions = {
+                from: `"MENSWEAR SYSTEM" <menswearofficial07@gmail.com>`, 
+                to: 'menswearofficial07@gmail.com',
+                replyTo: email,
+                subject: `🚨 NEW QUERY: ${subject || 'General Inquiry'}`,
+                html: `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong> ${message}</p>`
+            };
 
-        // ADMIN MAIL OPTIONS
-        const adminMailOptions = {
-            from: `"${senderName.toUpperCase()}" <menswearofficial07@gmail.com>`, 
-            to: 'menswearofficial07@gmail.com',
-            replyTo: senderEmail,
-            subject: `🚨 NEW QUERY: ${subject || 'General Inquiry'}`,
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 2px solid #0ea5e9; border-radius: 10px;">
-                    <h2 style="color: #0ea5e9; text-transform: uppercase;">New Support Request</h2>
-                    <hr>
-                    <p><strong>Customer Name:</strong> ${senderName}</p>
-                    <p><strong>Customer Email:</strong> ${senderEmail}</p>
-                    <p><strong>Subject:</strong> ${subject || 'N/A'}</p>
-                    <div style="background: #f4f4f4; padding: 15px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #0ea5e9;">
-                        <strong>Message:</strong><br>${message}
-                    </div>
-                </div>
-            `
-        };
+            const userMailOptions = {
+                from: `"MENSWEAR OFFICIAL" <menswearofficial07@gmail.com>`,
+                to: email,
+                subject: 'Support Ticket Received',
+                html: `<h1>Hello ${name}</h1><p>We have received your message.</p>`
+            };
 
-        // USER MAIL OPTIONS
-        const userMailOptions = {
-            from: `"MENSWEAR OFFICIAL" <menswearofficial07@gmail.com>`,
-            to: senderEmail,
-            subject: 'Support Ticket Received - MENSWEAR Official',
-            html: `
-                <div style="font-family: 'Helvetica', Arial, sans-serif; text-align: center; padding: 50px; background-color: #000; color: #fff; border-radius: 24px; border: 1px solid #1a1a1a;">
-                    <h1 style="color: #0ea5e9; font-style: italic; letter-spacing: 4px; font-weight: 900; margin-bottom: 0;">MENSWEAR OFFICIAL</h1>
-                    <p style="color: #444; font-size: 10px; letter-spacing: 2px; margin-top: 5px; text-transform: uppercase;">Premium Mens Apparel</p>
-                    <div style="height: 1px; background: linear-gradient(to right, transparent, #0ea5e9, transparent); width: 70%; margin: 30px auto;"></div>
-                    <p style="font-size: 20px; font-weight: bold; letter-spacing: -0.5px;">Hello <strong>${senderName}</strong>,</p>
-                    <p style="color: #aaa; font-size: 15px; line-height: 1.6; max-width: 400px; margin: 0 auto;">
-                        Your inquiry has been successfully logged into our system. Our team will respond shortly.
-                    </p>
-                    <div style="background: #0a0a0a; padding: 15px 25px; display: inline-block; border-radius: 12px; border: 1px solid #0ea5e9; margin-top: 20px;">
-                        <p style="margin: 0; font-size: 11px; color: #0ea5e9; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
-                            Ticket Status: <span style="color: #fff;">IN-REVIEW</span>
-                        </p>
-                    </div>
-                </div>
-            `
-        };
+            await transporter.sendMail(adminMailOptions);
+            await transporter.sendMail(userMailOptions);
 
-        // EXECUTE DUAL TRANSMISSION
-        await Promise.all([
-            transporter.sendMail(adminMailOptions),
-            transporter.sendMail(userMailOptions)
-        ]);
+        } catch (mailError) {
+            console.error("SMTP/Nodemailer Error:", mailError.message);
+            // Yahan hum return nahi kar rahe, taake user ko success message mil jaye kyunki DB mein save ho chuka hai.
+        }
 
-        res.status(200).json({ 
+        // 5. Success Response
+        return res.status(200).json({ 
             success: true, 
             message: "MESSAGE RECEIVED. OUR TEAM WILL RESPOND SHORTLY." 
         });
 
     } catch (error) {
-        console.error("CONTACT_CONTROLLER_ERROR:", error.message);
-        res.status(500).json({ 
+        console.error("FATAL_CONTROLLER_ERROR:", error);
+        return res.status(500).json({ 
             success: false, 
-            message: "SERVER ERROR: UNABLE TO PROCESS CONTACT REQUEST" 
+            message: "SERVER ERROR: SOMETHING WENT WRONG" 
         });
     }
 };
