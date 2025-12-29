@@ -43,7 +43,7 @@ const Success = () => {
             try {
                 let url;
                 if (sessionId) {
-                    url = `https://menswear-backend.vercel.app/api/orders/verify?session_id=${sessionId}`;
+                   url = `https://menswear-backend.vercel.app/api/orders/verify?session_id=${sessionId}&id=${orderId}`;
                 } else {
                     url = `https://menswear-backend.vercel.app/api/orders/single/${orderId}`;
                 }
