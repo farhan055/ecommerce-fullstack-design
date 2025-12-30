@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// 2. READ: Get All Products
+// --- GET ALL PRODUCTS ---
 router.get('/', async (req, res) => {
     try {
         const { category, search } = req.query;
@@ -44,74 +44,61 @@ router.get('/', async (req, res) => {
             ];
         }
         const products = await Product.find(query).maxTimeMS(4000);
-        if (products && products.length > 0) return res.status(200).json(products);
-        throw new Error("DB_EMPTY");
+        res.status(200).json(products);
     } catch (error) {
-        let filtered = fallbackProducts;
-        const { category, search } = req.query;
-        if (category && category !== 'All') filtered = filtered.filter(p => p.category === category);
-        if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.id.toLowerCase().includes(search.toLowerCase()));
-        res.status(200).json(filtered);
+        res.status(500).json({ message: "Server Error", error: error.message });
     }
 });
 
-// 3. READ: Get Single Product by Custom ID
-router.get('/:id', async (req, res) => {
-    const requestedId = req.params.id;
-    try {
-        let product = await Product.findOne({ id: requestedId }).maxTimeMS(2000);
-        if (!product) {
-            const mock = fallbackProducts.find(p => p.id === requestedId);
-            return mock ? res.json(mock) : res.status(404).json({ message: "Product Not Found" });
-        }
-        res.json(product);
-    } catch (e) {
-        const mock = fallbackProducts.find(p => p.id === requestedId);
-        res.json(mock || { message: "Error fetching product" });
-    }
-});
-
-// 4. UPDATE: Update Product by Custom ID
+// --- UPDATE PRODUCT (Hybrid ID Support) ---
 router.put('/:id', async (req, res) => {
-    const requestedId = req.params.id;
+    const requestedId = req.params.id; // Yeh custom ID bhi ho sakti hai (ts-001) ya DB ID
+    
     try {
-        const updatedProduct = await Product.findOneAndUpdate(
+        let updatedProduct = null;
+
+        // Step 1: Pehle Custom 'id' field se update ki koshish karein
+        updatedProduct = await Product.findOneAndUpdate(
             { id: requestedId },
             req.body,
-            { new: true, runValidators: true }
+            { new: true }
         );
 
-        if (updatedProduct) {
-            return res.status(200).json(updatedProduct);
+        // Step 2: Agar nahi mila, aur ID ka format MongoDB wala hai, toh _id se update karein
+        if (!updatedProduct && requestedId.match(/^[0-9a-fA-F]{24}$/)) {
+            updatedProduct = await Product.findByIdAndUpdate(
+                requestedId,
+                req.body,
+                { new: true }
+            );
         }
 
-        // Mock Fallback Update Simulation
-        const mockIndex = fallbackProducts.findIndex(p => p.id === requestedId);
-        if (mockIndex !== -1) {
-            return res.status(200).json({ ...fallbackProducts[mockIndex], ...req.body });
+        if (!updatedProduct) {
+            return res.status(404).json({ message: "Product not found with this ID" });
         }
 
-        res.status(404).json({ message: "Product not found to update" });
+        res.status(200).json(updatedProduct);
     } catch (error) {
+        console.error("Update Error:", error);
         res.status(500).json({ message: "Update failed", error: error.message });
     }
 });
 
-// 5. DELETE: Remove Product by Custom ID
+// --- DELETE PRODUCT (Hybrid ID Support) ---
 router.delete('/:id', async (req, res) => {
     const requestedId = req.params.id;
     try {
-        const deletedProduct = await Product.findOneAndDelete({ id: requestedId });
-        if (deletedProduct) {
-            return res.status(200).json({ message: "Product deleted successfully" });
+        let deletedProduct = await Product.findOneAndDelete({ id: requestedId });
+
+        if (!deletedProduct && requestedId.match(/^[0-9a-fA-F]{24}$/)) {
+            deletedProduct = await Product.findByIdAndDelete(requestedId);
         }
 
-        const mockExists = fallbackProducts.some(p => p.id === requestedId);
-        if (mockExists) {
-            return res.status(200).json({ message: "Mock product removed (session only)" });
+        if (!deletedProduct) {
+            return res.status(404).json({ message: "Product not found" });
         }
 
-        res.status(404).json({ message: "Product not found" });
+        res.status(200).json({ message: "Product deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: "Delete failed", error: error.message });
     }
