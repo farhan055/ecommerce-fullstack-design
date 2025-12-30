@@ -264,8 +264,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
             payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
-            success_url: `http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:3000/checkout`,
+            success_url: `https://menswearbrand.vercel.app/success?session_id={CHECKOUT_SESSION_ID}&orderId=${orderId}`,
+            cancel_url: `https://menswearbrand.vercel.app/checkout`,
             metadata: { customOrderId: orderId }
         });
         res.status(200).json({ url: session.url });
