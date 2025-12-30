@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Facebook, Instagram, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 // --- Shared Tailwind Classes ---
 const containerMaxClass = "container mx-auto px-6 max-w-7xl";
@@ -69,9 +69,9 @@ const Footer = () => {
     return (
         <footer className="relative bg-white border-t border-gray-100 font-sans overflow-hidden">
             
-            {/* --- Floating Notifications (Mobile Optimized) --- */}
+            {/* --- Floating Notifications (Top on Mobile, Top-Right on Desktop) --- */}
             {status.msg && (
-                <div className={`fixed bottom-10 right-1/2 translate-x-1/2 md:translate-x-0 md:bottom-auto md:top-10 md:right-10 z-[9999] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border-b-4 animate-bounce w-[90%] md:w-auto ${status.type === 'success' ? 'bg-black text-white border-[#0D6EFD]' : 'bg-red-600 text-white border-black'}`}>
+                <div className={`fixed top-5 left-1/2 -translate-x-1/2 md:translate-x-0 md:top-10 md:right-10 md:left-auto z-[9999] flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border-b-4 animate-bounce w-[90%] md:w-auto ${status.type === 'success' ? 'bg-black text-white border-[#0D6EFD]' : 'bg-red-600 text-white border-black'}`}>
                     {status.type === 'success' ? <CheckCircle className="text-[#0D6EFD]" /> : <AlertTriangle />}
                     <span className={sportyStyle}>{status.msg}</span>
                 </div>
@@ -107,11 +107,6 @@ const Footer = () => {
             {/* --- Main Links Grid --- */}
             <div className="py-16 md:py-20">
                 <div className={containerMaxClass}>
-                    {/* Responsive Grid: 
-                        - 1 column on mobile (items-center)
-                        - 3 columns on tablet
-                        - 5 columns on desktop
-                    */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 md:gap-12 text-center md:text-left">
                         
                         {/* Brand Section */}
@@ -126,11 +121,14 @@ const Footer = () => {
                                 Premium Apparel essentials for the modern man. Engineered for comfort, designed for the bold.
                             </p>
                             <div className="flex space-x-4">
-                                {[Instagram, Twitter, Facebook, Youtube].map((Icon, idx) => (
-                                    <a key={idx} href="#" className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400 hover:bg-[#0D6EFD] hover:text-white rounded-xl transition-all shadow-sm">
-                                        <Icon size={18} />
-                                    </a>
-                                ))}
+                                {/* Facebook */}
+                                <a href="https://www.facebook.com/profile.php?id=61585700317494" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400 hover:bg-[#0D6EFD] hover:text-white rounded-xl transition-all shadow-sm">
+                                    <Facebook size={18} />
+                                </a>
+                                {/* Instagram */}
+                                <a href="https://www.instagram.com/menswearstore_official?igsh=MTJ6eG9ic29qOGU5ZA==" target="_blank" rel="noopener noreferrer" className="w-10 h-10 flex items-center justify-center bg-gray-50 text-gray-400 hover:bg-[#E4405F] hover:text-white rounded-xl transition-all shadow-sm">
+                                    <Instagram size={18} />
+                                </a>
                             </div>
                         </div>
 
@@ -146,7 +144,7 @@ const Footer = () => {
                             <FooterLink text="Money Refund" to="/money-refund" /> 
                             <FooterLink text="Shipping" to="/shipping" /> 
                             <FooterLink text="Privacy Policy" to="/privacy-policy" />
-                            <FooterLink text="Terms of Service" to="/terms-of-service" />
+                            <FooterLink text="Terms of Service" to="/terms-of-service" /> 
                         </FooterSection>
 
                         <FooterSection title="For users"> 
@@ -174,7 +172,6 @@ const Footer = () => {
                     <p className={`text-[10px] md:text-[11px] text-center md:text-left ${sportyStyle}`}>
                         © 2025 Men's Wear Brand. All Rights Reserved.
                     </p>
-                    {/* Add simple payment icons or trust badges here if needed */}
                 </div>
             </div>
         </footer>
