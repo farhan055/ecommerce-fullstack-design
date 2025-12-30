@@ -170,7 +170,7 @@ const Success = () => {
                     <div className="lg:col-span-7 space-y-8 flex flex-col items-center md:items-start text-center md:text-left">
                         <div className="space-y-4 flex flex-col items-center md:items-start w-full">
                             <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest border border-green-100">
-                                <CheckCircle size={14}/> PAYMENT Verification
+                                <CheckCircle size={14}/> PAYMENT SUCCESSFUL 
                             </div>
                             <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.9]">
                                 ORDER <br/> <span className="text-sky-500 underline decoration-black">CONFIRMED.</span>
