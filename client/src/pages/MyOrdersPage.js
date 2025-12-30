@@ -50,18 +50,21 @@ const CancelModal = ({ isOpen, onClose, onConfirm, orderId, loading }) => {
 // --- Individual Order Card Component ---
 const OrderCard = ({ order, onCancelSuccess }) => {
     const { user } = useAuth();
-    const { currency = 'USD', exchangeRates = { USD: 1 } } = useCurrency(); 
+    const { currency: contextCurrency } = useCurrency(); 
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const items = order.orderItems || [];
 
-    // Currency Formatter
-    const formatPrice = (priceInUSD) => {
-        const safePrice = Number(priceInUSD) || 0;
-        const rate = exchangeRates?.[currency] || 1;
-        const converted = safePrice * rate;
-        return `${currency} ${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // --- HARDCODE CURRENCY LOGIC (FIXED) ---
+    const formatPrice = (priceVal) => {
+        const numPrice = Number(priceVal) || 0;
+        // Logic: Agar price 1000 se kam ho ya decimal ho toh USD ($), warna PKR (Rs)
+        let symbol = 'Rs ';
+        if (numPrice < 1000 || !Number.isInteger(numPrice)) {
+            symbol = '$';
+        }
+        return `${symbol}${numPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
     const getImageUrl = (path) => {
@@ -69,7 +72,6 @@ const OrderCard = ({ order, onCancelSuccess }) => {
         return `https://menswear-backend.vercel.app${path}`; 
     };
 
-    // Handle Order Cancellation and Admin Notification
     const handleCancelRequest = async () => {
         setIsCancelling(true);
         try {
@@ -77,14 +79,11 @@ const OrderCard = ({ order, onCancelSuccess }) => {
             const config = {
                 headers: { Authorization: `Bearer ${user?.token || storedUser?.token}` }
             };
-
-            // 1. API call to update status or delete order
             await axios.put(`https://menswear-backend.vercel.app/api/orders/cancel-order/${order._id}`, {
                 email: user?.email || storedUser?.email,
                 reason: "User cancelled from Dashboard"
             }, config);
 
-            // 2. Remove from UI state on success
             onCancelSuccess(order.customOrderId); 
             setIsModalOpen(false);
         } catch (err) {
@@ -97,27 +96,27 @@ const OrderCard = ({ order, onCancelSuccess }) => {
     return (
         <>
             <div className="bg-white border-[3px] border-black/5 rounded-3xl overflow-hidden mb-6 shadow-sm transition-all hover:shadow-md">
-                {/* Header: Order Info */}
-                <div className="p-6 bg-gray-50/50 flex justify-between items-center border-b-2 border-dashed border-gray-200">
-                    <div className="flex gap-10">
+                {/* Header: Order Info - Responsive adjustment */}
+                <div className="p-4 md:p-6 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-dashed border-gray-200">
+                    <div className="flex gap-6 md:gap-10">
                         <div>
                             <p className={sportySub}>Order Serial</p>
-                            <p className="font-black italic text-black">#{order.customOrderId}</p>
+                            <p className="font-black italic text-black text-sm md:text-base">#{order.customOrderId}</p>
                         </div>
                         <div>
                             <p className={sportySub}>Net Total</p>
-                            <p className="font-black italic text-[#0D6EFD]">{formatPrice(order.totalPrice)}</p>
+                            <p className="font-black italic text-[#0D6EFD] text-sm md:text-base">{formatPrice(order.totalPrice)}</p>
                         </div>
                     </div>
-                    <span className="px-4 py-1 bg-yellow-50 text-yellow-600 border border-yellow-100 rounded-full font-black italic text-[10px] uppercase">
+                    <span className="px-4 py-1 bg-yellow-50 text-yellow-600 border border-yellow-100 rounded-full font-black italic text-[9px] md:text-[10px] uppercase">
                         {order.status || 'Processing'}
                     </span>
                 </div>
 
                 {/* Body: Product Info */}
-                <div className="p-6 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden border-2 border-black/5 shrink-0">
+                <div className="p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div className="flex items-center gap-4 md:gap-6 w-full">
+                        <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-100 rounded-2xl overflow-hidden border-2 border-black/5 shrink-0">
                             <img 
                                 src={getImageUrl(items[0]?.image)} 
                                 alt="Product" 
@@ -125,23 +124,23 @@ const OrderCard = ({ order, onCancelSuccess }) => {
                                 onError={(e) => { e.target.src = '/placeholder.jpg'; }}
                             />
                         </div>
-                        <div>
-                            <p className={boldHeading + " text-xl"}>{items[0]?.name || "Product Item"}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className={boldHeading + " text-lg md:text-xl truncate"}>{items[0]?.name || "Product Item"}</p>
                             <p className={sportySub}>MW SIGNATURE DROP / {new Date().getFullYear()} EDITION</p>
                         </div>
                     </div>
 
-                    <div className="flex gap-3 w-full md:w-auto">
+                    <div className="flex gap-2 w-full md:w-auto">
                         <button 
                             onClick={() => setIsDetailsOpen(!isDetailsOpen)} 
-                            className={`flex-1 md:flex-none bg-black text-white px-8 py-4 rounded-2xl ${sportyButton} flex items-center justify-center gap-2 hover:bg-gray-800`}
+                            className={`flex-1 md:flex-none bg-black text-white px-4 md:px-8 py-4 rounded-2xl ${sportyButton} flex items-center justify-center gap-2 hover:bg-gray-800 whitespace-nowrap`}
                         >
-                            {isDetailsOpen ? 'CLOSE MANIFEST' : 'VIEW DETAILS'} 
+                            {isDetailsOpen ? 'CLOSE' : 'DETAILS'} 
                             <ChevronDown size={14} className={isDetailsOpen ? "rotate-180 transition-transform" : "transition-transform"} />
                         </button>
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="w-14 h-14 border-2 border-red-100 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                            className="w-12 h-12 md:w-14 md:h-14 border-2 border-red-100 text-red-500 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shrink-0"
                         >
                             <Trash2 size={20} />
                         </button>
@@ -150,17 +149,17 @@ const OrderCard = ({ order, onCancelSuccess }) => {
 
                 {/* Collapsible Details */}
                 {isDetailsOpen && (
-                    <div className="p-6 bg-gray-50/80 border-t-2 animate-in fade-in duration-300">
+                    <div className="p-4 md:p-6 bg-gray-50/80 border-t-2 animate-in fade-in duration-300">
                         <p className={sportySub + " mb-4"}>MANIFEST / PURCHASED ITEMS</p>
                         {items.map((item, i) => (
-                            <div key={i} className="flex justify-between items-center bg-white p-4 rounded-2xl mb-2 border border-black/5">
-                                <div className="flex items-center gap-4">
-                                    <img src={getImageUrl(item.image)} className="w-10 h-10 object-cover rounded-lg" alt={item.name} />
-                                    <span className="font-bold italic uppercase text-sm text-black">
+                            <div key={i} className="flex justify-between items-center bg-white p-3 md:p-4 rounded-2xl mb-2 border border-black/5">
+                                <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                    <img src={getImageUrl(item.image)} className="w-8 h-8 md:w-10 md:h-10 object-cover rounded-lg shrink-0" alt={item.name} />
+                                    <span className="font-bold italic uppercase text-[11px] md:text-sm text-black truncate">
                                         {item.name} <span className="text-[#0D6EFD]">x{item.qty || item.quantity}</span>
                                     </span>
                                 </div>
-                                <span className="font-black italic text-black">{formatPrice(item.price)}</span>
+                                <span className="font-black italic text-black text-[11px] md:text-sm shrink-0 ml-2">{formatPrice(item.price)}</span>
                             </div>
                         ))}
                     </div>
@@ -185,7 +184,6 @@ const MyOrdersPage = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Fetch Orders based on User Email
     const fetchOrders = async () => {
         try {
             setLoading(true);
@@ -197,7 +195,6 @@ const MyOrdersPage = () => {
                 return;
             }
 
-            // Using your specific endpoint
             const { data } = await axios.get(`https://menswear-backend.vercel.app/api/orders/myorders-by-email/${email}`);
             setOrders(data);
         } catch (err) { 
@@ -207,7 +204,6 @@ const MyOrdersPage = () => {
         }
     };
 
-    // Remove order from state after successful cancellation
     const removeOrderFromUI = (customId) => {
         setOrders(prev => prev.filter(order => order.customOrderId !== customId));
     };
@@ -218,21 +214,21 @@ const MyOrdersPage = () => {
 
     if (loading) {
         return (
-            <div className="h-screen flex flex-col items-center justify-center font-black italic gap-4">
+            <div className="h-screen flex flex-col items-center justify-center font-black italic gap-4 text-center px-4">
                 <Loader2 className="animate-spin text-[#0D6EFD]" size={40} />
-                <span className="tracking-widest">SYNCHRONIZING RECENT DATA...</span>
+                <span className="tracking-widest text-xs md:text-sm">SYNCHRONIZING RECENT DATA...</span>
             </div>
         );
     }
 
     return (
         <div className="min-h-screen bg-[#FDFDFD]">
-            <main className="max-w-5xl mx-auto p-6 md:p-12 py-16">
-                <button onClick={() => navigate('/profile')} className="flex items-center gap-2 mb-10 text-black hover:text-[#0D6EFD] transition-colors">
+            <main className="max-w-5xl mx-auto p-4 md:p-12 py-10 md:py-16">
+                <button onClick={() => navigate('/profile')} className="flex items-center gap-2 mb-6 md:mb-10 text-black hover:text-[#0D6EFD] transition-colors">
                     <ArrowLeft size={18} /><span className={sportySub}>Return to Control Center</span>
                 </button>
 
-                <h1 className={boldHeading + " text-6xl md:text-8xl mb-16"}>
+                <h1 className={boldHeading + " text-4xl sm:text-6xl md:text-8xl mb-8 md:mb-16"}>
                     MY <span className="text-[#0D6EFD]">ORDERS</span>
                 </h1>
 
@@ -243,17 +239,17 @@ const MyOrdersPage = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-20 border-4 border-dashed rounded-[3rem] bg-white border-gray-100">
-                        <ShoppingBag className="mx-auto text-gray-200 mb-6" size={80} />
-                        <h2 className={boldHeading + " text-3xl mb-4"}>No Orders History</h2>
-                        <Link to="/products" className={`inline-block bg-black text-white px-10 py-4 rounded-2xl ${sportyButton}`}>
+                    <div className="text-center py-12 md:py-20 border-4 border-dashed rounded-[2rem] md:rounded-[3rem] bg-white border-gray-100 mx-auto">
+                        <ShoppingBag className="mx-auto text-gray-200 mb-6 w-16 h-16 md:w-20 md:h-20" />
+                        <h2 className={boldHeading + " text-2xl md:text-3xl mb-4"}>No Orders History</h2>
+                        <Link to="/products" className={`inline-block bg-black text-white px-6 md:px-10 py-3 md:py-4 rounded-2xl ${sportyButton}`}>
                             Initiate First Order
                         </Link>
                     </div>
                 )}
             </main>
             <Footer />
-            <div className="text-center pb-10 text-[10px] font-black uppercase text-gray-400 tracking-widest">
+            <div className="text-center pb-10 text-[9px] md:text-[10px] font-black uppercase text-gray-400 tracking-widest">
                 © MENSWEAR OFFICIAL 2025
             </div>
         </div>

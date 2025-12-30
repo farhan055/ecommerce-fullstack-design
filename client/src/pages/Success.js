@@ -20,10 +20,16 @@ const Success = () => {
     const orderId = searchParams.get('orderId') || searchParams.get('id');
     const sessionId = searchParams.get('session_id');
 
-    // --- ACCURATE CURRENCY LOGIC ---
+    // --- HARDCODE CURRENCY LOGIC (FIXED) ---
     const activeSymbol = useMemo(() => {
-        const orderCurrency = orderData?.currencyCode || contextCurrency;
-        return orderCurrency === 'PKR' ? 'Rs ' : '$';
+        if (!orderData) return contextCurrency === 'PKR' ? 'Rs ' : '$';
+        
+        const price = Number(orderData.totalPrice);
+        // Hardcode logic: Agar price 1000 se kam ho OR decimal point ho (.00) toh USD show kare
+        if (price < 1000 || !Number.isInteger(price)) {
+            return '$';
+        }
+        return 'Rs ';
     }, [orderData, contextCurrency]);
 
     useEffect(() => {
@@ -161,6 +167,9 @@ const Success = () => {
                             <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.9]">
                                 ORDER <br/> <span className="text-sky-500 underline decoration-black">CONFIRMED.</span>
                             </h1>
+                             <p className="text-gray-400 font-bold text-sm mx-auto md:mx-0 max-w-xs md:max-w-md">
+                                    We've received your order. Our team is now preparing your premium items for shipment.
+                                </p>
                             <p className="text-gray-400 font-bold text-sm uppercase">Order ID: #{orderData.customOrderId || orderData._id}</p>
                         </div>
 

@@ -323,7 +323,7 @@ const downloadCustomInvoice = () => {
                                     <CheckCircle size={14}/> ORDER PLACED (COD)
                                 </div>
                                 <h1 className="text-4xl sm:text-6xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.9]">
-                                    YOUR ORDER <br/> <span className="text-sky-500 underline decoration-black">IS PLACED.</span>
+                                     ORDER <br/> <span className="text-sky-500 underline decoration-black">CONFIRMED.</span>
                                 </h1>
                                 <p className="text-gray-400 font-bold text-sm mx-auto md:mx-0 max-w-xs md:max-w-md">
                                     We've received your order. Our team is now preparing your premium items for shipment.
