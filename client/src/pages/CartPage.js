@@ -32,19 +32,22 @@ const CartPage = () => {
         
         // --- RESTORED ORIGINAL SHIPPING LOGIC ---
         // Converts the subtotal normally
-        const subtotal = convertPrice(sub);
-        
-        // Original logic: Base 500 PKR divided by 280 then converted
-        const shipping = cartItems.length > 0 ? convertPrice(500 / 280) : 0; 
-        
-        // Final total sum
-        const total = parseFloat(subtotal) + parseFloat(shipping);
+// --- FIXED SHIPPING LOGIC ---
+        const subtotal = convertPrice(sub);
+        
+        // Agar currency PKR hai toh seedha 500, warna 500/280 ka converted price
+        const shipping = cartItems.length > 0 
+            ? (currency === 'PKR' ? 500 : convertPrice(500 / 280)) 
+            : 0; 
+        
+        // Final total sum (parseFloat se ensure hoga ke numbers plus ho rahe hain)
+        const total = parseFloat(subtotal) + parseFloat(shipping);
 
-        return { 
-            convertedSubtotal: subtotal,
-            convertedShipping: shipping,
-            convertedTotal: total.toFixed(2)
-        };
+        return { 
+            convertedSubtotal: subtotal,
+            convertedShipping: shipping,
+            convertedTotal: total.toFixed(currency === 'PKR' ? 0 : 2) // PKR no point
+        };
     }, [cartItems, convertPrice]);
 
     /**
