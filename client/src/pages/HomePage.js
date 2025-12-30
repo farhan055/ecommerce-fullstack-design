@@ -238,22 +238,35 @@ const HomePage = () => {
 
                    {/* TRENDING PRODUCTS GRID */}
 <section className="mt-16 md:mt-24 px-4 md:px-10">
-    <div className="flex items-center gap-4 md:gap-8 mb-12">
-        <h2 className={`text-2xl md:text-5xl ${sportyHeading}`}>Trending <span className="text-[#0099ff]">Now</span></h2>
+    {/* Heading Area */}
+    <div className="flex items-center gap-4 md:gap-8 mb-8 md:mb-12">
+        <h2 className={`text-2xl md:text-5xl ${sportyHeading}`}>
+            Trending <span className="text-[#0099ff]">Now</span>
+        </h2>
         <div className="h-[2px] md:h-[4px] flex-grow bg-gray-100 rounded-full"></div>
     </div>
 
-    {/* 1. Products Grid  */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 justify-items-center">
+    {/* 1. Products Grid - Optimized for Mobile (2 Columns) and Desktop (4 Columns) */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
         {!productsLoading ? (
-            trendingProducts.map(p => <ProductCard key={p.id} product={p} />)
-        ) : (
-            [...Array(4)].map((_, i) => (
-                <div key={i} className="h-80 md:h-[450px] w-full bg-gray-100 rounded-[2rem] animate-pulse"></div>
+            trendingProducts.map(p => (
+                <div key={p.id} className="flex justify-center">
+                    <ProductCard product={p} />
+                </div>
             ))
+        ) : (
+            /* Skeleton Loading State matches the 2-column mobile layout */
+            <div className="contents">
+                {[...Array(4)].map((_, i) => (
+                    <div 
+                        key={i} 
+                        className="h-[280px] sm:h-80 md:h-[450px] w-full bg-gray-100 rounded-[1.5rem] md:rounded-[2rem] animate-pulse"
+                    ></div>
+                ))}
+            </div>
         )}
     </div>
-
+    
     {/* 2. CALL TO ACTION BUTTON*/}
     <div className="mt-20 flex justify-center w-full">
                  <button 
