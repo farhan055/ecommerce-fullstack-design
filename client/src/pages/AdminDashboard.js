@@ -20,7 +20,7 @@ const AdminDashboard = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     
     // Configuration Constants
-    const rates = { USD: 1, PKR: 280, EUR: 0.92, GBP: 0.79 };
+    const rates = { USD: 1, PKR: 280, };
     const categories = ["shirts", "officeshirts", "pants-trousers", "jackets-hoodies"];
 
     // Form State for Products
@@ -28,7 +28,7 @@ const AdminDashboard = () => {
         name: '', price: '', image: '', category: 'shirts', stock: '50', currency: 'USD', sizes: 'S, M, L, XL'
     });
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || (localStorage.getItem('userInfo') ? JSON.parse(localStorage.getItem('userInfo')).token : null);
 
     // --- Helper Functions ---
     
@@ -79,52 +79,61 @@ const AdminDashboard = () => {
     };
 
     // Create or Update Product Logic
-    const handleAction = async (e) => {
-        e.preventDefault();
-        if (!newProduct.image) {
-            showToast("Asset identity missing! Upload image.", "error");
-            return;
+   const handleAction = async (e) => {
+    e.preventDefault();
+    if (!newProduct.image) {
+        showToast("Asset identity missing! Upload image.", "error");
+        return;
+    }
+
+    if (!token) {
+        showToast("Session Expired: Please Login Again", "error");
+        return;
+    }
+
+    try {
+        const rawPrice = parseFloat(newProduct.price);
+        const priceInUSD = (rawPrice / rates[newProduct.currency]).toFixed(2);
+        
+        const sizesArray = typeof newProduct.sizes === 'string' 
+            ? newProduct.sizes.split(',').map(s => s.trim()).filter(s => s !== "")
+            : newProduct.sizes;
+
+        const productData = { 
+            name: newProduct.name,
+            price: Number(priceInUSD),
+            image: newProduct.image,
+            category: newProduct.category,
+            stock: Number(newProduct.stock) || 0,
+            sizes: sizesArray
+        };
+
+        const url = editMode 
+            ? `https://menswear-backend.vercel.app/api/products/${selectedId}` 
+            : 'https://menswear-backend.vercel.app/api/products';
+
+        const res = await fetch(url, {
+            method: editMode ? 'PUT' : 'POST',
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` // Yahan token ja raha hai
+            },
+            body: JSON.stringify(productData)
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+            fetchProducts(); 
+            resetForm();
+            showToast(editMode ? "Asset Registry Updated" : "Product Deployed Successfully", "success");
+        } else {
+            // Agar 401 aaye to message show karega
+            showToast(result.message || "Unauthorized Access", "error");
         }
-        try {
-            const rawPrice = parseFloat(newProduct.price);
-            const priceInUSD = (rawPrice / rates[newProduct.currency]).toFixed(2);
-            
-            // Format sizes from string to array
-            const sizesArray = typeof newProduct.sizes === 'string' 
-                ? newProduct.sizes.split(',').map(s => s.trim()).filter(s => s !== "")
-                : newProduct.sizes;
-
-            const productData = { 
-                name: newProduct.name,
-                price: Number(priceInUSD),
-                image: newProduct.image,
-                category: newProduct.category,
-                stock: Number(newProduct.stock) || 0,
-                sizes: sizesArray
-            };
-
-            const url = editMode ? `https://menswear-backend.vercel.app/api/products/${selectedId}` : 'https://menswear-backend.vercel.app/api/products';
-            const res = await fetch(url, {
-                method: editMode ? 'PUT' : 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(productData)
-            });
-
-            const result = await res.json();
-            if (res.ok) {
-                fetchProducts(); 
-                resetForm();
-                showToast(editMode ? "Asset Registry Updated" : "Product Deployed Successfully", "success");
-            } else {
-                showToast(result.message || "System Error", "error");
-            }
-        } catch (err) { 
-            showToast("Neural Link Failed: Connection Error", "error");
-        }
-    };
+    } catch (err) { 
+        showToast("Neural Link Failed: Connection Error", "error");
+    }
+};
 
     // Reset Form to Initial State
     const resetForm = () => {
