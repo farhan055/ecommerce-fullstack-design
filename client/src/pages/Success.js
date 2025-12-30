@@ -69,8 +69,7 @@ const Success = () => {
         return `${d1.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${d2.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
     }, []);
 
-    // --- ACCURATE PDF INVOICE ---
-    const downloadCustomInvoice = (data, symbol) => {
+   const downloadCustomInvoice = (data, symbol) => {
         if (!data) return;
         const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
@@ -129,27 +128,36 @@ const Success = () => {
             theme: 'striped'
         });
 
-        const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setDrawColor(14, 165, 233); doc.line(pageWidth - 85, finalY - 5, pageWidth - 15, finalY - 5);
+        // --- Totals Logic ---
+        const finalY = doc.lastAutoTable.finalY + 10;
+        const shippingValue = Number(data.shippingPrice || 0).toFixed(2);
+        const totalValue = Number(data.totalPrice).toFixed(2);
 
-        doc.setFontSize(10); doc.setTextColor(0, 0, 0);
-        doc.text("NET TOTAL PAID:", pageWidth - 85, finalY + 5);
-        doc.setFontSize(14); doc.setTextColor(14, 165, 233); doc.setFont("helvetica", "bold");
-        doc.text(`${symbol}${Number(data.totalPrice).toFixed(2)}`, pageWidth - 15, finalY + 5, { align: 'right' });
+        doc.setDrawColor(14, 165, 233); doc.line(pageWidth - 85, finalY - 2, pageWidth - 15, finalY - 2);
 
-        doc.save(`Invoice_${data.customOrderId || 'Order'}.pdf`);
+        // Shipping Row
+        doc.setFontSize(9); doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "normal");
+        doc.text("SHIPPING FEE:", pageWidth - 85, finalY + 5);
+        doc.text(`${symbol}${shippingValue}`, pageWidth - 15, finalY + 5, { align: 'right' });
+
+        // Net Total Row
+        doc.setFontSize(10); doc.setFont("helvetica", "bold");
+        doc.text("NET TOTAL PAID:", pageWidth - 85, finalY + 12);
+        doc.setFontSize(14); doc.setTextColor(14, 165, 233);
+        doc.text(`${symbol}${totalValue}`, pageWidth - 15, finalY + 12, { align: 'right' });
+
+        doc.save(`Men's Wear Invoice_${data.customOrderId || 'Order'}.pdf`);
     };
-
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white text-center px-4">
             <Loader2 className="animate-spin text-sky-500 mb-4" size={50} />
             <h2 className="font-black uppercase italic tracking-tighter text-2xl">Processing Payment...</h2>
         </div>
     );
 
     if (!orderData) return (
-        <div className="min-h-screen flex items-center justify-center">
-            <p className="font-bold">Order not found.</p>
+        <div className="min-h-screen flex items-center justify-center px-4 text-center">
+            <p className="font-bold uppercase tracking-widest text-sm">Order not found.</p>
         </div>
     );
 
@@ -158,33 +166,34 @@ const Success = () => {
             <div className="max-w-6xl mx-auto px-4 py-12 md:py-24">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                     
-                    {/* Left Column */}
-                    <div className="lg:col-span-7 space-y-8">
-                        <div className="space-y-4">
+                    {/* Left Column - Responsive Center Align */}
+                    <div className="lg:col-span-7 space-y-8 flex flex-col items-center md:items-start text-center md:text-left">
+                        <div className="space-y-4 flex flex-col items-center md:items-start w-full">
                             <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest border border-green-100">
-                                <CheckCircle size={14}/> PAYMENT SUCCESSFUL
+                                <CheckCircle size={14}/> PAYMENT Verification
                             </div>
                             <h1 className="text-5xl md:text-8xl font-black uppercase italic tracking-tighter leading-[0.9]">
                                 ORDER <br/> <span className="text-sky-500 underline decoration-black">CONFIRMED.</span>
                             </h1>
-                             <p className="text-gray-400 font-bold text-sm mx-auto md:mx-0 max-w-xs md:max-w-md">
+                             <p className="text-gray-400 font-bold text-sm max-w-xs md:max-w-md">
                                     We've received your order. Our team is now preparing your premium items for shipment.
                                 </p>
-                            <p className="text-gray-400 font-bold text-sm uppercase">Order ID: #{orderData.customOrderId || orderData._id}</p>
+                            <p className="text-gray-400 font-black text-xs uppercase tracking-widest">Order ID: #{orderData.customOrderId || orderData._id}</p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-8 rounded-[2rem] bg-gray-50 border-2 border-transparent hover:border-black transition-all">
+                        {/* Cards Section - Centered on Mobile */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                            <div className="p-8 rounded-[2rem] bg-gray-50 border-2 border-transparent hover:border-black transition-all flex flex-col items-center md:items-start text-center md:text-left">
                                 <MapPin className="text-sky-500 mb-4" size={28} />
                                 <h3 className="font-black uppercase text-[11px] mb-3 tracking-widest text-gray-400">Ship To</h3>
                                 <p className="font-black uppercase text-black leading-tight">
                                     {orderData.shippingAddress?.firstName} {orderData.shippingAddress?.lastName}<br/>
-                                    <span className="text-gray-500 text-xs font-bold">
+                                    <span className="text-gray-500 text-xs font-bold block mt-1">
                                         {orderData.shippingAddress?.address}, {orderData.shippingAddress?.city}
                                     </span>
                                 </p>
                             </div>
-                            <div className="p-8 rounded-[2rem] bg-gray-50 border-2 border-transparent hover:border-black transition-all">
+                            <div className="p-8 rounded-[2rem] bg-gray-50 border-2 border-transparent hover:border-black transition-all flex flex-col items-center md:items-start text-center md:text-left">
                                 <CreditCard className="text-sky-500 mb-4" size={28} />
                                 <h3 className="font-black uppercase text-[11px] mb-3 tracking-widest text-gray-400">Order Info</h3>
                                 <p className="font-black uppercase text-[11px] italic">Method: {orderData.paymentMethod}</p>
@@ -194,15 +203,15 @@ const Success = () => {
                     </div>
 
                     {/* Right Column (Summary Card) */}
-                    <div className="lg:col-span-5">
+                    <div className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
                         <div className="bg-black rounded-[3rem] p-8 md:p-10 text-white shadow-2xl border-b-[12px] border-sky-500">
-                            <h3 className="text-2xl font-black italic uppercase mb-8 flex items-center gap-2">
+                            <h3 className="text-2xl font-black italic uppercase mb-8 flex items-center justify-center md:justify-start gap-2">
                                 <ShoppingBag className="text-sky-500"/> Summary
                             </h3>
                             <div className="space-y-4 mb-10 max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
                                 {orderData.orderItems?.map((item, i) => (
                                     <div key={i} className="flex justify-between items-center gap-4 border-b border-white/10 pb-2">
-                                        <p className="text-[11px] font-black uppercase truncate flex-1 leading-none">
+                                        <p className="text-[11px] font-black uppercase truncate flex-1 leading-none text-left">
                                             {(item.qty || item.quantity)}x {item.name}
                                         </p>
                                         <span className="font-black italic text-sky-400 text-sm">
@@ -211,17 +220,17 @@ const Success = () => {
                                     </div>
                                 ))}
                             </div>
-                            <div className="border-t border-white/10 pt-6">
+                            <div className="border-t border-white/10 pt-6 text-center md:text-left">
                                 <p className="text-[10px] font-black text-white/40 uppercase mb-1">Net Amount Paid</p>
                                 <p className="text-5xl font-black italic text-sky-500 leading-none">
                                     {activeSymbol}{Number(orderData.totalPrice).toFixed(2)}
                                 </p>
                             </div>
                             <div className="mt-10 space-y-3">
-                                <button onClick={() => downloadCustomInvoice(orderData, activeSymbol)} className="w-full bg-sky-500 text-black py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2 hover:bg-white transition-all">
+                                <button onClick={() => downloadCustomInvoice(orderData, activeSymbol)} className="w-full bg-sky-500 text-black py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2 hover:bg-white transition-all active:scale-95">
                                     <FileDown size={18}/> Download Paid Invoice
                                 </button>
-                                <button onClick={() => navigate('/')} className="w-full bg-white/5 text-white py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2 hover:bg-white hover:text-black transition-all">
+                                <button onClick={() => navigate('/')} className="w-full bg-white/5 text-white py-5 rounded-2xl font-black uppercase text-xs flex items-center justify-center gap-2 hover:bg-white hover:text-black transition-all active:scale-95">
                                     Continue Shopping <ArrowRight size={18}/>
                                 </button>
                             </div>
